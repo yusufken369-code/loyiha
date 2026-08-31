@@ -8,7 +8,12 @@ export const initialTasks = [
     category: "Work",
     completed: false,
     isImportant: true,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    subtasks: [
+      { id: "sub-1", title: "Create Figma component library", completed: true },
+      { id: "sub-2", title: "Setup color tokens for dark mode", completed: true },
+      { id: "sub-3", title: "Test mobile drawer navigation UX", completed: false }
+    ]
   },
   {
     id: "task-2",
@@ -19,7 +24,11 @@ export const initialTasks = [
     category: "Study",
     completed: false,
     isImportant: true,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    subtasks: [
+      { id: "sub-4", title: "Practice useMemo & useCallback scenarios", completed: true },
+      { id: "sub-5", title: "Solve 3 LeetCode array problems", completed: false }
+    ]
   },
   {
     id: "task-3",
@@ -30,7 +39,11 @@ export const initialTasks = [
     category: "Personal",
     completed: true,
     isImportant: false,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    subtasks: [
+      { id: "sub-6", title: "Buy almond milk and avocados", completed: true },
+      { id: "sub-7", title: "Pick up fresh sourdough bread", completed: true }
+    ]
   },
   {
     id: "task-4",
@@ -41,7 +54,8 @@ export const initialTasks = [
     category: "Work",
     completed: false,
     isImportant: false,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    subtasks: []
   },
   {
     id: "task-5",
@@ -52,6 +66,7 @@ export const initialTasks = [
     category: "Study",
     completed: true,
     isImportant: false,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    subtasks: []
   }
 ];

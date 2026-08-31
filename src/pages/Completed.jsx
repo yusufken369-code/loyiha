@@ -7,6 +7,7 @@ export default function Completed({
   tasks,
   onToggleComplete,
   onToggleImportant,
+  onToggleSubtask,
   onEditTask,
   onDeleteTask,
   onClearCompleted,
@@ -55,6 +56,7 @@ export default function Completed({
               task={task}
               onToggleComplete={onToggleComplete}
               onToggleImportant={onToggleImportant}
+              onToggleSubtask={onToggleSubtask}
               onEdit={onEditTask}
               onDelete={onDeleteTask}
             />

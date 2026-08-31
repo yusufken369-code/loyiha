@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Check, 
   Calendar, 
@@ -6,17 +6,26 @@ import {
   Trash2, 
   Star, 
   Tag, 
-  AlertCircle 
+  AlertCircle,
+  CheckSquare,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 export default function TaskCard({ 
   task, 
   onToggleComplete, 
   onToggleImportant, 
+  onToggleSubtask,
   onEdit, 
   onDelete 
 }) {
-  const { id, title, description, dueDate, priority, category, completed, isImportant } = task;
+  const { id, title, description, dueDate, priority, category, completed, isImportant, subtasks = [] } = task;
+  const [showSubtasks, setShowSubtasks] = useState(false);
+
+  // Subtask statistics calculation
+  const totalSubtasks = subtasks.length;
+  const completedSubtasks = subtasks.filter(s => s.completed).length;
 
   // Category styling map
   const categoryStyles = {
@@ -55,7 +64,7 @@ export default function TaskCard({
     <div
       className={`group bg-white dark:bg-slate-900 border rounded-2xl p-4 sm:p-5 transition-all duration-200 shadow-xs hover:shadow-md ${
         completed
-          ? 'border-gray-100 dark:border-slate-800/60 opacity-75 bg-gray-50/50 dark:bg-slate-900/40'
+          ? 'border-gray-100 dark:border-slate-800/60 opacity-80 bg-gray-50/50 dark:bg-slate-900/40'
           : 'border-gray-100 dark:border-slate-800/90 hover:border-gray-200 dark:hover:border-slate-700'
       }`}
     >
@@ -141,7 +150,46 @@ export default function TaskCard({
                 </span>
               )}
 
+              {/* Subtasks Progress Badge Toggle */}
+              {totalSubtasks > 0 && (
+                <button
+                  onClick={() => setShowSubtasks(!showSubtasks)}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300 hover:bg-indigo-100 transition-colors"
+                >
+                  <CheckSquare className="w-3 h-3" />
+                  <span>{completedSubtasks}/{totalSubtasks} subtasks</span>
+                  {showSubtasks ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                </button>
+              )}
+
             </div>
+
+            {/* Expandable Subtasks Checklist */}
+            {totalSubtasks > 0 && showSubtasks && (
+              <div className="mt-3.5 pt-3 border-t border-gray-100 dark:border-slate-800/80 space-y-2">
+                {subtasks.map((sub) => (
+                  <div
+                    key={sub.id}
+                    onClick={() => onToggleSubtask && onToggleSubtask(id, sub.id)}
+                    className="flex items-center gap-2 text-xs text-gray-700 dark:text-slate-300 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                  >
+                    <div
+                      className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-colors ${
+                        sub.completed
+                          ? 'bg-indigo-600 border-indigo-600 text-white'
+                          : 'border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800'
+                      }`}
+                    >
+                      {sub.completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                    </div>
+                    <span className={sub.completed ? 'line-through text-gray-400 dark:text-slate-500' : ''}>
+                      {sub.title}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
           </div>
 
         </div>

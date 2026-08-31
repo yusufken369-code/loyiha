@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, Tag, AlertCircle, Sparkles } from 'lucide-react';
+import { X, Calendar, Tag, AlertCircle, Sparkles, Plus, Trash2 } from 'lucide-react';
 
 export default function TaskModal({ 
   isOpen, 
@@ -15,9 +15,11 @@ export default function TaskModal({
     dueDate: defaultDueDate,
     priority: 'Medium',
     category: 'Work',
-    isImportant: false
+    isImportant: false,
+    subtasks: []
   });
 
+  const [newSubtaskInput, setNewSubtaskInput] = useState('');
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -28,7 +30,8 @@ export default function TaskModal({
         dueDate: initialData.dueDate || defaultDueDate,
         priority: initialData.priority || 'Medium',
         category: initialData.category || 'Work',
-        isImportant: initialData.isImportant || false
+        isImportant: initialData.isImportant || false,
+        subtasks: initialData.subtasks || []
       });
     } else {
       setFormData({
@@ -37,9 +40,11 @@ export default function TaskModal({
         dueDate: defaultDueDate,
         priority: 'Medium',
         category: 'Work',
-        isImportant: false
+        isImportant: false,
+        subtasks: []
       });
     }
+    setNewSubtaskInput('');
     setErrors({});
   }, [initialData, isOpen]);
 
@@ -55,6 +60,27 @@ export default function TaskModal({
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
+
+  const handleAddSubtask = (e) => {
+    e.preventDefault();
+    if (newSubtaskInput.trim()) {
+      setFormData((prev) => ({
+        ...prev,
+        subtasks: [
+          ...prev.subtasks,
+          { id: `sub-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`, title: newSubtaskInput.trim(), completed: false }
+        ]
+      }));
+      setNewSubtaskInput('');
+    }
+  };
+
+  const handleRemoveSubtask = (subId) => {
+    setFormData((prev) => ({
+      ...prev,
+      subtasks: prev.subtasks.filter((s) => s.id !== subId)
+    }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -87,7 +113,7 @@ export default function TaskModal({
       />
 
       {/* Modal Container */}
-      <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl shadow-xl overflow-hidden animate-modal z-10">
+      <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl shadow-xl overflow-hidden animate-modal z-10 max-h-[90vh] flex flex-col">
         
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800/80">
@@ -109,7 +135,7 @@ export default function TaskModal({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
           
           {/* Task Title Input */}
           <div>
@@ -145,12 +171,56 @@ export default function TaskModal({
               Description <span className="text-gray-400 font-normal lowercase">(optional)</span>
             </label>
             <textarea
-              rows={3}
+              rows={2}
               placeholder="Add details, notes or instructions..."
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               className="w-full px-3.5 py-2.5 text-sm bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700/80 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-all resize-none"
             />
+          </div>
+
+          {/* Subtasks Section */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-slate-400 mb-1.5">
+              Subtasks Checklist
+            </label>
+            
+            {/* Existing Subtask list */}
+            {formData.subtasks.length > 0 && (
+              <div className="space-y-1.5 mb-2.5">
+                {formData.subtasks.map((sub) => (
+                  <div key={sub.id} className="flex items-center justify-between bg-gray-50 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg text-xs">
+                    <span className="text-gray-800 dark:text-slate-200 font-medium">{sub.title}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSubtask(sub.id)}
+                      className="text-gray-400 hover:text-rose-500 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Add subtask input */}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Add subtask item..."
+                value={newSubtaskInput}
+                onChange={(e) => setNewSubtaskInput(e.target.value)}
+                className="flex-1 px-3 py-1.5 text-xs bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700/80 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-indigo-500"
+              />
+              <button
+                type="button"
+                onClick={handleAddSubtask}
+                className="px-3 py-1.5 bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-300 hover:bg-indigo-100 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Add
+              </button>
+            </div>
           </div>
 
           {/* Due Date & Category Row */}
@@ -161,14 +231,12 @@ export default function TaskModal({
               <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-slate-400 mb-1.5">
                 Due Date
               </label>
-              <div className="relative">
-                <input
-                  type="date"
-                  value={formData.dueDate}
-                  onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700/80 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-500 transition-all"
-                />
-              </div>
+              <input
+                type="date"
+                value={formData.dueDate}
+                onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                className="w-full px-3.5 py-2 text-sm bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700/80 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-500 transition-all"
+              />
             </div>
 
             {/* Category Select */}
@@ -234,7 +302,7 @@ export default function TaskModal({
               id="isImportant"
               checked={formData.isImportant}
               onChange={(e) => setFormData({ ...formData, isImportant: e.target.checked })}
-              className="w-4 h-4 text-indigo-600 rounded border-gray-300 dark:border-slate-700 focus:ring-indigo-500"
+              className="w-4 h-4 text-indigo-600 rounded border-gray-300 dark:border-slate-700 focus:ring-indigo-500 cursor-pointer"
             />
             <label htmlFor="isImportant" className="text-xs font-semibold text-gray-700 dark:text-slate-300 cursor-pointer">
               Mark as ⭐ Important Task
