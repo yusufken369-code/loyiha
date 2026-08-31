@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Settings, User, RotateCcw, Trash2, Database, Check } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, Settings, User, RotateCcw, Trash2, Database, Check, Download, Upload } from 'lucide-react';
 
 export default function SettingsModal({
   isOpen,
@@ -8,10 +8,12 @@ export default function SettingsModal({
   setUserName,
   onResetToDefaults,
   onClearAllData,
-  taskCount
+  tasks,
+  onImportTasks
 }) {
   const [nameInput, setNameInput] = useState(userName);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const fileInputRef = useRef(null);
 
   if (!isOpen) return null;
 
@@ -22,6 +24,40 @@ export default function SettingsModal({
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 2000);
     }
+  };
+
+  // Export JSON Backup
+  const handleExportBackup = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tasks, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `taskflow_backup_${new Date().toISOString().split('T')[0]}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  };
+
+  // Import JSON Backup
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const imported = JSON.parse(event.target.result);
+        if (Array.isArray(imported)) {
+          onImportTasks(imported);
+          alert('Tasks backup imported successfully!');
+          onClose();
+        } else {
+          alert('Invalid backup file format.');
+        }
+      } catch (err) {
+        alert('Failed to parse JSON file.');
+      }
+    };
+    reader.readAsText(file);
   };
 
   return (
@@ -87,10 +123,44 @@ export default function SettingsModal({
             )}
           </form>
 
+          {/* Backup Export & Import */}
+          <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-slate-800">
+            <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-slate-400">
+              Backup & Data Transfer
+            </label>
+
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={handleExportBackup}
+                className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 hover:bg-indigo-100 transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Export JSON
+              </button>
+
+              <button
+                type="button"
+                onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 hover:bg-purple-100 transition-colors"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                Import JSON
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept=".json"
+                className="hidden"
+              />
+            </div>
+          </div>
+
           {/* Storage & Data Section */}
           <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-slate-800">
             <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-slate-400">
-              Data & Persistence
+              Data Management
             </label>
 
             <div className="bg-gray-50 dark:bg-slate-800/60 p-3 rounded-xl flex items-center justify-between text-xs text-gray-600 dark:text-slate-300">
@@ -98,7 +168,7 @@ export default function SettingsModal({
                 <Database className="w-4 h-4 text-indigo-500" />
                 Saved Tasks Count:
               </span>
-              <span className="font-bold text-gray-900 dark:text-white">{taskCount} tasks</span>
+              <span className="font-bold text-gray-900 dark:text-white">{tasks?.length || 0} tasks</span>
             </div>
 
             <div className="flex flex-col gap-2">

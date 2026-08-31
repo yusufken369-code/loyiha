@@ -63,16 +63,18 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
 
-  // 5. Filters State
+  // 5. Filters & Sorting State
   const [statusFilter, setStatusFilter] = useState('All');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [priorityFilter, setPriorityFilter] = useState('All');
+  const [sortBy, setSortBy] = useState('newest');
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleResetFilters = () => {
     setStatusFilter('All');
     setCategoryFilter('All');
     setPriorityFilter('All');
+    setSortBy('newest');
     setSearchQuery('');
   };
 
@@ -106,6 +108,18 @@ export default function App() {
     );
   };
 
+  const handleToggleSubtask = (taskId, subtaskId) => {
+    setTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        const updatedSubtasks = (t.subtasks || []).map((sub) =>
+          sub.id === subtaskId ? { ...sub, completed: !sub.completed } : sub
+        );
+        return { ...t, subtasks: updatedSubtasks };
+      })
+    );
+  };
+
   const handleDeleteTask = (id) => {
     setTasks((prev) => prev.filter((t) => t.id !== id));
   };
@@ -132,6 +146,10 @@ export default function App() {
     setTasks([]);
   };
 
+  const handleImportTasks = (importedTasks) => {
+    setTasks(importedTasks);
+  };
+
   // Task stats calculation
   const taskStats = useMemo(() => {
     const total = tasks.length;
@@ -141,9 +159,9 @@ export default function App() {
     return { total, completed, remaining, important };
   }, [tasks]);
 
-  // Filter tasks dynamically
+  // Filter & Sort tasks dynamically
   const filteredTasks = useMemo(() => {
-    return tasks.filter((task) => {
+    let result = tasks.filter((task) => {
       // Status filter
       if (statusFilter === 'Active' && task.completed) return false;
       if (statusFilter === 'Completed' && !task.completed) return false;
@@ -164,7 +182,30 @@ export default function App() {
 
       return true;
     });
-  }, [tasks, statusFilter, categoryFilter, priorityFilter, searchQuery]);
+
+    // Sorting
+    result.sort((a, b) => {
+      if (sortBy === 'newest') {
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      }
+      if (sortBy === 'oldest') {
+        return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+      }
+      if (sortBy === 'dueDate') {
+        return new Date(a.dueDate || '9999-12-31') - new Date(b.dueDate || '9999-12-31');
+      }
+      if (sortBy === 'priority') {
+        const priorityWeight = { High: 3, Medium: 2, Low: 1 };
+        return (priorityWeight[b.priority] || 0) - (priorityWeight[a.priority] || 0);
+      }
+      if (sortBy === 'title') {
+        return a.title.localeCompare(b.title);
+      }
+      return 0;
+    });
+
+    return result;
+  }, [tasks, statusFilter, categoryFilter, priorityFilter, sortBy, searchQuery]);
 
   return (
     <div className="min-h-screen flex bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
@@ -200,9 +241,11 @@ export default function App() {
           {activeTab === 'dashboard' && (
             <Dashboard
               tasks={filteredTasks}
+              allTasks={tasks}
               taskStats={taskStats}
               onToggleComplete={handleToggleComplete}
               onToggleImportant={handleToggleImportant}
+              onToggleSubtask={handleToggleSubtask}
               onEditTask={handleOpenEditModal}
               onDeleteTask={handleDeleteTask}
               onOpenModal={handleOpenAddModal}
@@ -212,6 +255,8 @@ export default function App() {
               setCategoryFilter={setCategoryFilter}
               priorityFilter={priorityFilter}
               setPriorityFilter={setPriorityFilter}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               onResetFilters={handleResetFilters}
@@ -224,6 +269,7 @@ export default function App() {
               tasks={filteredTasks}
               onToggleComplete={handleToggleComplete}
               onToggleImportant={handleToggleImportant}
+              onToggleSubtask={handleToggleSubtask}
               onEditTask={handleOpenEditModal}
               onDeleteTask={handleDeleteTask}
               onOpenModal={handleOpenAddModal}
@@ -233,6 +279,8 @@ export default function App() {
               setCategoryFilter={setCategoryFilter}
               priorityFilter={priorityFilter}
               setPriorityFilter={setPriorityFilter}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               onResetFilters={handleResetFilters}
@@ -244,6 +292,7 @@ export default function App() {
               tasks={tasks}
               onToggleComplete={handleToggleComplete}
               onToggleImportant={handleToggleImportant}
+              onToggleSubtask={handleToggleSubtask}
               onEditTask={handleOpenEditModal}
               onDeleteTask={handleDeleteTask}
               onOpenModal={handleOpenAddModal}
@@ -255,6 +304,7 @@ export default function App() {
               tasks={tasks}
               onToggleComplete={handleToggleComplete}
               onToggleImportant={handleToggleImportant}
+              onToggleSubtask={handleToggleSubtask}
               onEditTask={handleOpenEditModal}
               onDeleteTask={handleDeleteTask}
               onClearCompleted={handleClearCompleted}
@@ -283,7 +333,8 @@ export default function App() {
         setUserName={handleUpdateUserName}
         onResetToDefaults={handleResetToDefaults}
         onClearAllData={handleClearAllData}
-        taskCount={tasks.length}
+        tasks={tasks}
+        onImportTasks={handleImportTasks}
       />
 
     </div>

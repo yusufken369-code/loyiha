@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Filter, X, SlidersHorizontal } from 'lucide-react';
+import { Search, Filter, X, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 
 export default function FilterBar({
   statusFilter,
@@ -8,17 +8,27 @@ export default function FilterBar({
   setCategoryFilter,
   priorityFilter,
   setPriorityFilter,
+  sortBy,
+  setSortBy,
   searchQuery,
   setSearchQuery,
   onResetFilters
 }) {
   const categories = ['All', 'Work', 'Study', 'Personal'];
   const priorities = ['All', 'High', 'Medium', 'Low'];
+  const sortOptions = [
+    { value: 'newest', label: 'Newest First' },
+    { value: 'oldest', label: 'Oldest First' },
+    { value: 'dueDate', label: 'Due Date' },
+    { value: 'priority', label: 'Priority (High to Low)' },
+    { value: 'title', label: 'Title (A-Z)' }
+  ];
 
   const hasActiveFilters = 
     statusFilter !== 'All' || 
     categoryFilter !== 'All' || 
     priorityFilter !== 'All' || 
+    sortBy !== 'newest' ||
     searchQuery.trim() !== '';
 
   return (
@@ -68,17 +78,17 @@ export default function FilterBar({
 
       </div>
 
-      {/* Category & Priority filter dropdowns */}
+      {/* Category, Priority & Sorting Dropdowns */}
       <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-gray-100 dark:border-slate-800/60 text-xs">
         
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           
           <span className="flex items-center gap-1 font-semibold text-gray-400 dark:text-slate-500 mr-1">
             <SlidersHorizontal className="w-3.5 h-3.5" />
             Filters:
           </span>
 
-          {/* Category Dropdown/Pills */}
+          {/* Category Dropdown */}
           <div className="flex items-center gap-1">
             <span className="text-gray-500 dark:text-slate-400 font-medium">Category:</span>
             <select
@@ -92,7 +102,7 @@ export default function FilterBar({
             </select>
           </div>
 
-          {/* Priority Dropdown/Pills */}
+          {/* Priority Dropdown */}
           <div className="flex items-center gap-1">
             <span className="text-gray-500 dark:text-slate-400 font-medium">Priority:</span>
             <select
@@ -102,6 +112,21 @@ export default function FilterBar({
             >
               {priorities.map((p) => (
                 <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Sort By Dropdown */}
+          <div className="flex items-center gap-1">
+            <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 ml-1" />
+            <span className="text-gray-500 dark:text-slate-400 font-medium">Sort:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs font-semibold text-gray-700 dark:text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
+            >
+              {sortOptions.map((s) => (
+                <option key={s.value} value={s.value}>{s.label}</option>
               ))}
             </select>
           </div>

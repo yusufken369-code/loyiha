@@ -7,6 +7,7 @@ export default function Important({
   tasks,
   onToggleComplete,
   onToggleImportant,
+  onToggleSubtask,
   onEditTask,
   onDeleteTask,
   onOpenModal
@@ -52,6 +53,7 @@ export default function Important({
               task={task}
               onToggleComplete={onToggleComplete}
               onToggleImportant={onToggleImportant}
+              onToggleSubtask={onToggleSubtask}
               onEdit={onEditTask}
               onDelete={onDeleteTask}
             />

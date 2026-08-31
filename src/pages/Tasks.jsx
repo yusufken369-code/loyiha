@@ -8,6 +8,7 @@ export default function Tasks({
   tasks,
   onToggleComplete,
   onToggleImportant,
+  onToggleSubtask,
   onEditTask,
   onDeleteTask,
   onOpenModal,
@@ -17,6 +18,8 @@ export default function Tasks({
   setCategoryFilter,
   priorityFilter,
   setPriorityFilter,
+  sortBy,
+  setSortBy,
   searchQuery,
   setSearchQuery,
   onResetFilters
@@ -32,7 +35,7 @@ export default function Tasks({
             All Tasks
           </h2>
           <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 mt-0.5">
-            Manage, filter, and track all your ongoing and completed work.
+            Manage, filter, sort, and track all your ongoing and completed work.
           </p>
         </div>
 
@@ -53,6 +56,8 @@ export default function Tasks({
         setCategoryFilter={setCategoryFilter}
         priorityFilter={priorityFilter}
         setPriorityFilter={setPriorityFilter}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         onResetFilters={onResetFilters}
@@ -73,6 +78,7 @@ export default function Tasks({
               task={task}
               onToggleComplete={onToggleComplete}
               onToggleImportant={onToggleImportant}
+              onToggleSubtask={onToggleSubtask}
               onEdit={onEditTask}
               onDelete={onDeleteTask}
             />
